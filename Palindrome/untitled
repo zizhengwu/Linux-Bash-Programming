@@ -1,0 +1,27 @@
+#! /bin/bash
+# read string from input
+read string
+# ignore the syntax other than a-zA-Z
+string=$(expr ${string//[^a-zA-Z]/})
+# get the length
+l=$(expr length $string)
+# get each char of the string
+for (( i = 1; i < $(($l+1)); i++ )); do
+        ch[i]=$(expr substr $string $i 1)
+done
+flag=1
+head=1
+tail=$(($l))
+while [[ $head -lt $tail ]]; do
+	if [[ ${ch[head]} != ${ch[tail]} ]]; then
+		# if it is not a Palindrome
+		flag=0
+	fi
+	head=$(($head+1))
+	tail=$(($tail-1))
+done
+if [[ $flag = 1 ]]; then
+	echo "it IS a Palindrome"
+else
+	echo "it ISN'T a Palindrome"
+fi

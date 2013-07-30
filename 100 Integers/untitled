@@ -1,0 +1,39 @@
+#! /bin/bash
+#in order to make it brief, here takes five integers from input
+sum=0
+max=-65534
+min=65535
+for (( i = 0; i < 5; i++ )); do
+	#read from input
+	read a[$i]
+done
+for (( i = 0; i < 5; i++ )); do
+	#calculate sum
+	sum=$(($sum+$((a[$i]))))
+	if [[ $((a[i])) -gt $((max)) ]]; then
+		#check if max
+		max=$((a[i]))
+	fi
+	if [[ $((a[i])) -lt $((min)) ]]; then
+		#check if min
+		min=$((a[i]))
+	fi
+done
+echo "sum = " $sum
+echo "max = " $max
+echo "min = " $min
+#start sorting
+for (( i = 0; i < 5; i++ )); do
+	for (( i1 = 4; i1 > i; i1-- )); do
+		if [[ $((a[i1])) -lt $((a[i]))  ]]; then
+			#exchange the value
+			temp=$((a[i]))
+			a[i]=$((a[i1]))
+			a[i1]=$((temp))
+		fi
+	done
+done
+for (( i = 0; i < 5; i++ )); do
+	#echo the sorted array
+	echo $((a[i]))
+done
