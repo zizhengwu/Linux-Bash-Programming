@@ -125,10 +125,12 @@ teacher()
 				1 ) echo "Enter the new Student Account Number"
 					read tempaccount
 					echo $tempaccount >> "./$tempcourse/$tempcourse.stu.txt"
+					echo "$tempaccount $tempcourse" >> ./data.txt
 					;;
 				2 ) echo "Enter the Student Account Number to delete"
 					read tempaccount
 					sed -i "/$tempaccount/d" "./$tempcourse/$tempcourse.stu.txt"
+					sed -i "/$tempaccount/d" "./data.txt"
 					;;
 				3 ) echo "Enter the Student Account Number to find him"
 					read tempaccount
@@ -205,6 +207,52 @@ teacher()
 student()
 {
 	echo "Hi $2, your Account Number is $1."
+	echo "Your homework are listed below:"
+	count=1
+	while read PARTA PARTB
+		do
+			if [[ $1 = $PARTA ]]; then
+				while read PARTC
+					do
+						echo "$count. $PARTC"
+						count=$(($count+1))
+						cat "./$PARTB/$PARTC.txt"
+				done < "./$PARTB/homework.txt"
+			fi
+	done < data.txt
+	echo "Enter the Homework name to operate"
+	read work
+	echo "Your Commands List"
+	echo "1. Upload the Homework"
+	echo "2. View the Uploaded Homework"
+	echo "3. Show the Feedback"
+	read com
+	case $com in
+		1 ) echo "Enter the Homework, to end with a blank line"
+			while read PARTA PARTB
+				do
+					if [[ $1 = $PARTA ]]; then
+						while read PARTC
+							do
+								if [[ $work = $PARTC ]]; then
+									temp=$PARTB
+								fi
+						done < "./$PARTB/homework.txt"
+					fi
+			done < data.txt
+			while read line
+			do
+				# break if the line is empty
+				[ -z "$line" ] && break
+				echo "$line" >> "./$temp/HOMEWORK.$1.$work.txt"
+			done
+			;;
+		2 ) echo "Content: "
+			tail ./*/*$1*$work*
+			;;
+		3 ) 
+			;;
+	esac
 }
 
 
