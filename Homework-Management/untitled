@@ -8,7 +8,7 @@ login()
 		read USERNAME
 		echo "Input your PASSWORD"
 		read PASSWORD
-		while read PARTA PARTB PARTC
+		while read PARTA PARTB PARTC PARTD
 		do
 			if [[ $USERNAME = $PARTA ]] && [[ $PASSWORD = $PARTB ]]; then
 				flag=1
@@ -23,8 +23,10 @@ login()
 				admin
 				;;
 			2 ) echo "You are Teacher."
+				teacher $PARTA $PARTD
 				;;
 			3 ) echo "You are Student."
+				student $PARTA $PARTD
 				;;
 
 	esac	
@@ -35,21 +37,22 @@ admin()
 	echo "Commands List"
 	echo "1. Create Teacher Account"
 	echo "2. Edit Teacher Account"
-	echo "3. List Teacher Account"
-	echo "4. Create Course"
-	echo "5. Edit Course"
-	echo "6. Delete Course"
+	echo "3. Delete Teacher Account"
+	echo "4. List Teacher Account"
+	echo "5. Create Course"
+	echo "6. Edit Course"
+	echo "7. Delete Course"
 	read com
 	case  $com in
-		1 ) echo "Enter new Teacher Account name"
+		1 ) echo "Enter new Teacher Account Number"
 			read tempaccount
 			echo "Enter new Teacher PASSWORD"
 			read temppass
 			echo "Enter new Teacher Name"
 			read tempname
-			echo "$tempaccount $temppass 2 $tempname" >> logininfo
+			echo "$tempaccount $temppass 2 $tempname" >> logininfo.txt
 			;;
-		2 ) echo "Enter Teacher Account name to edit"
+		2 ) echo "Enter Teacher Account Number to edit"
 			read tempaccount
 			echo "Enter the new Teacher PASSWORD"
 			read temppass
@@ -58,13 +61,151 @@ admin()
 			sed -i "/$tempaccount/d" logininfo.txt
 			echo "$tempaccount $temppass 2 $tempname" >> logininfo.txt
 			;;
-		3 ) while read PARTA PARTB PARTC PARTD
+		3 ) echo "Enter the Teacher Account Number to delete"
+			read tempaccount
+			sed -i "/$tempaccount/d" logininfo.txt
+			;;
+		4 ) while read PARTA PARTB PARTC PARTD
 			do
 				if [[ $PARTC = 2 ]]; then
 					echo "$PARTA $PARTD"
 				fi
 			done < logininfo.txt
+			;;
+		5 ) echo "Enter new Course name"
+			read tempcourse
+			echo "Enter the relating Teacher Number"
+			read tempaccount
+			mkdir "$tempcourse"
+			echo "$tempcourse $tempaccount" >> courseinfo.txt
+			;;
+		6 ) echo "Enter the Course Name to edit"
+			read tempcourse
+			sed -i "/$tempcourse/d" courseinfo.txt
+			echo "Enter new Course name"
+			read tempcourse
+			echo "Enter the relating Teacher Number"
+			read tempaccount
+			echo "$tempcourse $tempaccount" >> courseinfo.txt
+			;;
+		7 ) echo "Enter the Course name to delete"
+			read tempcourse
+			sed -i "/$tempcourse/d" courseinfo.txt
+			;;
  	esac
 }
+
+teacher()
+{
+	echo "Hi $2, your Account Number is $1."
+	echo "Your Courses are below:"
+	while read PARTA PARTB
+	do
+		count=1
+		if [[ $1 = $PARTB ]]; then
+			echo "$count. $PARTA"
+			count=$(($count+1))
+		fi
+	done < courseinfo.txt
+	echo "Enter the Course name to operate"
+	read tempcourse
+	echo "Select Command Category"
+	echo "1. About Student"
+	echo "2. About Course Information"
+	echo "3. About Course Homework"
+	read com
+	case $com in
+		1 ) echo "Commands list"
+			echo "1. New Student in this Course"
+			echo "2. Delete Student in this Course"
+			echo "3. Find Student"
+			echo "Select the Command"
+			read com
+			case $com in
+				1 ) echo "Enter the new Student Account Number"
+					read tempaccount
+					echo $tempaccount >> "./$tempcourse/$tempcourse.stu.txt"
+					;;
+				2 ) echo "Enter the Student Account Number to delete"
+					read tempaccount
+					sed -i "/$tempaccount/d" "./$tempcourse/$tempcourse.stu.txt"
+					;;
+				3 ) echo "Enter the Student Account Number to find him"
+					read tempaccount
+					while read PARTA PARTB PARTC PARTD
+					do
+						if [[ $PARTA = $tempaccount ]]; then
+							echo "$PARTA $PARTD"
+						fi
+					done < logininfo.txt
+					;;
+			esac
+			;;
+		2 ) echo "Commands List"
+			echo "1. New Course Information"
+			echo "2. Delete Course Information"
+			echo "3. List Course Information"
+			read com
+			case $com in
+				1 ) echo "Enter the Information, to end with a blank line"
+					while read line
+					do
+						# break if the line is empty
+						[ -z "$line" ] && break
+						echo "$line" >> "./$tempcourse/$tempcourse.inf.txt"
+					done
+					;;
+				2 )	echo "" >  "./$tempcourse/$tempcourse.inf.txt"
+					;;
+				3 ) cat "./$tempcourse/$tempcourse.inf.txt"
+					;;
+			esac
+			;;
+		3 ) echo "Commands List"
+			echo "1. New Homework"
+			echo "2. Edit Homework"
+			echo "3. Delete Homework"
+			echo "4. List Homework"
+			echo "5. List Students's Completions"
+			read com
+			case $com in
+				1 ) echo "Enter the Homework Title"
+					read title
+					echo "$title" >> "./$tempcourse/homework.txt"
+					touch "./$tempcourse/$title.txt"
+					echo "Enter the Homework, to end with a blank line"
+					while read line
+					do
+						# break if the line is empty
+						[ -z "$line" ] && break
+						echo "$line" >> "./$tempcourse/$title.txt"
+					done
+					;;
+				2 ) echo "Enter the Homework Title"
+					read title
+					touch "./$tempcourse/$title.txt"
+					echo "Enter the Homework, to end with a blank line"
+					while read line
+					do
+						# break if the line is empty
+						[ -z "$line" ] && break
+						echo "$line" > "./$tempcourse/$title.txt"
+					done
+					;;
+				3 ) echo "Enter the Homework title to delete"
+					read title
+					sed -i "/$title/d" "./$tempcourse/homework.txt"
+					rm "./$tempcourse/$title.txt"
+					;;
+			esac
+			;;
+	esac
+}
+
+student()
+{
+	echo "Hi $2, your Account Number is $1."
+}
+
 
 login
