@@ -1,0 +1,70 @@
+#! /bin/sh
+
+login()
+{
+	flag=0
+	while [[ $flag = 0 ]]; do
+		echo "Input your USERNAME"
+		read USERNAME
+		echo "Input your PASSWORD"
+		read PASSWORD
+		while read PARTA PARTB PARTC
+		do
+			if [[ $USERNAME = $PARTA ]] && [[ $PASSWORD = $PARTB ]]; then
+				flag=1
+				USERTYPE=$PARTC
+				echo "Congratulations, Logged in."
+				break
+			fi
+		done < logininfo.txt
+	done
+	case $USERTYPE in
+			1 ) echo "You are Administrator."
+				admin
+				;;
+			2 ) echo "You are Teacher."
+				;;
+			3 ) echo "You are Student."
+				;;
+
+	esac	
+}
+
+admin()
+{
+	echo "Commands List"
+	echo "1. Create Teacher Account"
+	echo "2. Edit Teacher Account"
+	echo "3. List Teacher Account"
+	echo "4. Create Course"
+	echo "5. Edit Course"
+	echo "6. Delete Course"
+	read com
+	case  $com in
+		1 ) echo "Enter new Teacher Account name"
+			read tempaccount
+			echo "Enter new Teacher PASSWORD"
+			read temppass
+			echo "Enter new Teacher Name"
+			read tempname
+			echo "$tempaccount $temppass 2 $tempname" >> logininfo
+			;;
+		2 ) echo "Enter Teacher Account name to edit"
+			read tempaccount
+			echo "Enter the new Teacher PASSWORD"
+			read temppass
+			echo "Enter the new Teacher Name"
+			read tempname
+			sed -i "/$tempaccount/d" logininfo.txt
+			echo "$tempaccount $temppass 2 $tempname" >> logininfo.txt
+			;;
+		3 ) while read PARTA PARTB PARTC PARTD
+			do
+				if [[ $PARTC = 2 ]]; then
+					echo "$PARTA $PARTD"
+				fi
+			done < logininfo.txt
+ 	esac
+}
+
+login
