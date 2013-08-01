@@ -1,0 +1,10 @@
+#! /bin/sh
+# use dir as variable
+read dir
+# use ls and grep and wc, making use of pipe
+echo "Number of normal files"
+ls -l $dir | grep "^-" | wc -l
+echo "Number of executable files"
+ls -F $dir | grep "*$" | wc -l
+echo "Number of sub directories"
+ls -F $dir | grep "/$" | wc -l

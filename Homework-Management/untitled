@@ -4,6 +4,7 @@ login()
 {
 	flag=0
 	while [[ $flag = 0 ]]; do
+		# loop until logged in
 		echo "Input your USERNAME"
 		read USERNAME
 		echo "Input your PASSWORD"
@@ -11,14 +12,17 @@ login()
 		while read PARTA PARTB PARTC PARTD
 		do
 			if [[ $USERNAME = $PARTA ]] && [[ $PASSWORD = $PARTB ]]; then
+				# judge if the username and the password match
 				flag=1
 				USERTYPE=$PARTC
+				# get the usertype
 				echo "Congratulations, Logged in."
 				break
 			fi
 		done < logininfo.txt
 	done
 	case $USERTYPE in
+			# function according to the user type
 			1 ) echo "You are Administrator."
 				admin
 				;;
@@ -42,8 +46,10 @@ admin()
 	echo "5. Create Course"
 	echo "6. Edit Course"
 	echo "7. Delete Course"
+	echo "8. Create Student Account"
 	read com
 	case  $com in
+			# New Teacher info will be added to the logininfo.txt
 		1 ) echo "Enter new Teacher Account Number"
 			read tempaccount
 			echo "Enter new Teacher PASSWORD"
@@ -52,6 +58,7 @@ admin()
 			read tempname
 			echo "$tempaccount $temppass 2 $tempname" >> logininfo.txt
 			;;
+			# The function of Editting the Teacher info delete the previous and add the new
 		2 ) echo "Enter Teacher Account Number to edit"
 			read tempaccount
 			echo "Enter the new Teacher PASSWORD"
@@ -61,10 +68,12 @@ admin()
 			sed -i "/$tempaccount/d" logininfo.txt
 			echo "$tempaccount $temppass 2 $tempname" >> logininfo.txt
 			;;
+			# The function of deleting the Teacher info
 		3 ) echo "Enter the Teacher Account Number to delete"
 			read tempaccount
 			sed -i "/$tempaccount/d" logininfo.txt
 			;;
+			# Judge whether the usertype is Teacher, if it is, List it
 		4 ) while read PARTA PARTB PARTC PARTD
 			do
 				if [[ $PARTC = 2 ]]; then
@@ -72,6 +81,7 @@ admin()
 				fi
 			done < logininfo.txt
 			;;
+			# New course will mkdir a new directory and the course info will be added to courseinfo.txt
 		5 ) echo "Enter new Course name"
 			read tempcourse
 			echo "Enter the relating Teacher Number"
@@ -79,6 +89,7 @@ admin()
 			mkdir "$tempcourse"
 			echo "$tempcourse $tempaccount" >> courseinfo.txt
 			;;
+			# The function of Editting the Course info delete the previous and add the new
 		6 ) echo "Enter the Course Name to edit"
 			read tempcourse
 			sed -i "/$tempcourse/d" courseinfo.txt
@@ -88,17 +99,29 @@ admin()
 			read tempaccount
 			echo "$tempcourse $tempaccount" >> courseinfo.txt
 			;;
+			# The function of deleting the Teacher info
 		7 ) echo "Enter the Course name to delete"
 			read tempcourse
 			sed -i "/$tempcourse/d" courseinfo.txt
+			;;
+			# New Student info will be added to the logininfo.txt
+		8 ) echo "Enter new Student Account Number"
+			read tempaccount
+			echo "Enter new Student PASSWORD"
+			read temppass
+			echo "Enter new Student Name"
+			read tempname
+			echo "$tempaccount $temppass 3 $tempname" >> logininfo.txt
 			;;
  	esac
 }
 
 teacher()
 {
+	# Show a warm welcome
 	echo "Hi $2, your Account Number is $1."
 	echo "Your Courses are below:"
+	# Get his course from courseinfo.txt
 	while read PARTA PARTB
 	do
 		count=1
@@ -122,16 +145,19 @@ teacher()
 			echo "Select the Command"
 			read com
 			case $com in
+					# New Student info will be added to the data.txt
 				1 ) echo "Enter the new Student Account Number"
 					read tempaccount
 					echo $tempaccount >> "./$tempcourse/$tempcourse.stu.txt"
 					echo "$tempaccount $tempcourse" >> ./data.txt
 					;;
+					# The function of Editting the Student info delete the previous and add the new
 				2 ) echo "Enter the Student Account Number to delete"
 					read tempaccount
 					sed -i "/$tempaccount/d" "./$tempcourse/$tempcourse.stu.txt"
 					sed -i "/$tempaccount/d" "./data.txt"
 					;;
+					# The function of finding the Teacher info
 				3 ) echo "Enter the Student Account Number to find him"
 					read tempaccount
 					while read PARTA PARTB PARTC PARTD
@@ -149,6 +175,7 @@ teacher()
 			echo "3. List Course Information"
 			read com
 			case $com in
+					# New Course information will be written to the corresponding text file, the information can be written in many lines, and ending with a blank line.
 				1 ) echo "Enter the Information, to end with a blank line"
 					while read line
 					do
@@ -157,8 +184,10 @@ teacher()
 						echo "$line" >> "./$tempcourse/$tempcourse.inf.txt"
 					done
 					;;
+					# Echo none to rewritten the content
 				2 )	echo "" >  "./$tempcourse/$tempcourse.inf.txt"
 					;;
+					# Use cat to display the information
 				3 ) cat "./$tempcourse/$tempcourse.inf.txt"
 					;;
 			esac
@@ -171,6 +200,7 @@ teacher()
 			echo "5. List Students's Completions"
 			read com
 			case $com in
+					# New Homework info will be added to the corresponding text file in the course directory.
 				1 ) echo "Enter the Homework Title"
 					read title
 					echo "$title" >> "./$tempcourse/homework.txt"
@@ -183,6 +213,7 @@ teacher()
 						echo "$line" >> "./$tempcourse/$title.txt"
 					done
 					;;
+					# Homework info will be rewritten to the corresponding text file in the course directory.
 				2 ) echo "Enter the Homework Title"
 					read title
 					touch "./$tempcourse/$title.txt"
@@ -194,10 +225,19 @@ teacher()
 						echo "$line" > "./$tempcourse/$title.txt"
 					done
 					;;
+					# Delete homework will delete the corresponding information file and the data in the homework.txt
 				3 ) echo "Enter the Homework title to delete"
 					read title
 					sed -i "/$title/d" "./$tempcourse/homework.txt"
 					rm "./$tempcourse/$title.txt"
+					;;
+					# List homework
+				4 ) echo "All the Homework are listed as below:"
+					tail -n +1 -- ./$tempcourse/homework.txt
+					;;
+					# Use Regular Expression to list all completions
+				5 ) echo "All the students' Completions are listed as below:"
+					tail -n +1 -- ./$tempcourse/HOMEWORK*.txt
 					;;
 			esac
 			;;
@@ -209,6 +249,7 @@ student()
 	echo "Hi $2, your Account Number is $1."
 	echo "Your homework are listed below:"
 	count=1
+	# display all the courses
 	while read PARTA PARTB
 		do
 			if [[ $1 = $PARTA ]]; then
@@ -225,7 +266,6 @@ student()
 	echo "Your Commands List"
 	echo "1. Upload the Homework"
 	echo "2. View the Uploaded Homework"
-	echo "3. Show the Feedback"
 	read com
 	case $com in
 		1 ) echo "Enter the Homework, to end with a blank line"
@@ -249,8 +289,6 @@ student()
 			;;
 		2 ) echo "Content: "
 			tail ./*/*$1*$work*
-			;;
-		3 ) 
 			;;
 	esac
 }
